@@ -1,4 +1,4 @@
-name: 👑 Build APK - Professional
+name: 👑 Build APK - Ultra
 
 on:
   workflow_dispatch:
@@ -14,22 +14,27 @@ on:
         default: 'com.darkai.app'
         type: string
       app_color:
-        description: '🎨 لون خلفية التطبيق'
+        description: '🎨 لون خلفية التطبيق (مثال: #000000 للأسود)'
         required: true
         default: '#000000'
         type: string
       icon_file:
-        description: '🖼️ اسم ملف الأيقونة PNG'
+        description: '🖼️ اسم ملف الأيقونة PNG (ضع الملف في مجلد المشروع)'
         required: true
         default: 'icon.png'
         type: string
       site_folder:
-        description: '📁 مجلد موقع الويب'
+        description: '📁 مجلد موقع الويب (اتركه فارغاً للمجلد الرئيسي)'
         required: false
         default: ''
         type: string
+      splash_duration:
+        description: '⏱️ مدة شاشة البداية (بالمللي ثانية)'
+        required: false
+        default: '2000'
+        type: string
       version_name:
-        description: '📌 إصدار التطبيق'
+        description: '📌 إصدار التطبيق (مثال: 1.0.0)'
         required: false
         default: '1.0.0'
         type: string
@@ -43,84 +48,98 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # ═══════════════════════════════════════
-      # 📥 تحميل المشروع
-      # ═══════════════════════════════════════
-      - name: 📥 تحميل المشروع
+      - name: 📥 تحميل المشروع بالكامل
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ═══════════════════════════════════════
-      # ☕ تثبيت Java
-      # ═══════════════════════════════════════
-      - name: ☕ تثبيت Java 17
+      - name: ☕ تثبيت Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # ═══════════════════════════════════════
-      # 🟢 تثبيت Node.js
-      # ═══════════════════════════════════════
-      - name: 🟢 تثبيت Node.js 20
+      - name: 🟢 تثبيت Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ═══════════════════════════════════════
-      # 📦 تثبيت الأدوات
-      # ═══════════════════════════════════════
       - name: 📦 تثبيت Capacitor والأدوات
         run: |
           npm install -g @capacitor/cli @capacitor/core @capacitor/android
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq imagemagick
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
 
-      # ═══════════════════════════════════════
-      # 📁 تجهيز ملفات الموقع
-      # ═══════════════════════════════════════
       - name: 📁 سحب وتجهيز جميع ملفات الموقع
         run: |
-          echo "🔍 جاري تجهيز ملفات الموقع..."
+          echo "🔍 جاري سحب جميع ملفات المشروع..."
           
+          # عرض جميع الملفات الموجودة في المشروع
+          echo "📋 جميع الملفات في المشروع:"
+          find . -type f -not -path './.git/*' -not -path './node_modules/*' | sort
+          
+          # إنشاء مجلد www
           rm -rf www
           mkdir -p www
           
+          # تحديد مجلد المصدر
           SOURCE_DIR="${{ github.event.inputs.site_folder }}"
           if [ -z "$SOURCE_DIR" ]; then
             SOURCE_DIR="."
           fi
           
-          echo "📁 نسخ الملفات من: $SOURCE_DIR"
+          echo ""
+          echo "📁 جاري نسخ الملفات من: $SOURCE_DIR"
           
+          # نسخ جميع الملفات والمجلدات
           if [ "$SOURCE_DIR" = "." ]; then
             shopt -s dotglob
             for item in "$SOURCE_DIR"/*; do
               basename=$(basename "$item")
               if [ "$basename" != ".git" ] && [ "$basename" != ".github" ] && [ "$basename" != "node_modules" ] && [ "$basename" != "android" ] && [ "$basename" != "ios" ] && [ "$basename" != "www" ] && [ "$basename" != "package.json" ] && [ "$basename" != "package-lock.json" ] && [ "$basename" != "capacitor.config.json" ]; then
+                echo "  📄 نسخ: $basename"
                 cp -r "$item" www/ 2>/dev/null || true
               fi
             done
           else
             if [ -d "$SOURCE_DIR" ]; then
+              echo "  ✅ المجلد $SOURCE_DIR موجود"
               cp -r "$SOURCE_DIR"/* www/ 2>/dev/null || true
               cp -r "$SOURCE_DIR"/.* www/ 2>/dev/null || true
+            else
+              echo "  ❌ المجلد $SOURCE_DIR غير موجود!"
+              shopt -s dotglob
+              for item in ./*; do
+                basename=$(basename "$item")
+                if [ "$basename" != ".git" ] && [ "$basename" != ".github" ] && [ "$basename" != "node_modules" ] && [ "$basename" != "android" ] && [ "$basename" != "ios" ] && [ "$basename" != "www" ] && [ "$basename" != "package.json" ] && [ "$basename" != "package-lock.json" ] && [ "$basename" != "capacitor.config.json" ]; then
+                  echo "  📄 نسخ: $basename"
+                  cp -r "$item" www/ 2>/dev/null || true
+                fi
+              done
             fi
           fi
           
+          # حذف أي ملفات غير مرغوب فيها داخل www
           rm -rf www/.git www/.github www/node_modules www/.gitignore 2>/dev/null || true
           rm -rf www/package.json www/package-lock.json 2>/dev/null || true
           rm -rf www/android www/ios www/capacitor.config.json 2>/dev/null || true
           rm -rf www/icon.png www/icon.jpg www/icon.jpeg 2>/dev/null || true
           
-          echo "✅ تم تجهيز الموقع"
-          echo "📁 الملفات: $(find www -type f | wc -l)"
-          echo "💾 الحجم: $(du -sh www | cut -f1)"
+          echo ""
+          echo "✅ تم نسخ جميع ملفات الموقع"
+          echo "📊 إحصائيات مجلد www:"
+          echo "  📁 عدد الملفات: $(find www -type f | wc -l)"
+          echo "  📂 عدد المجلدات: $(find www -type d | wc -l)"
+          echo "  💾 الحجم الإجمالي: $(du -sh www | cut -f1)"
+          
+          if [ -f "www/index.html" ]; then
+            echo ""
+            echo "✅ تم العثور على index.html"
+          else
+            echo ""
+            echo "⚠️ تحذير: لم يتم العثور على index.html!"
+          fi
 
-      # ═══════════════════════════════════════
-      # 📄 إنشاء package.json
-      # ═══════════════════════════════════════
       - name: 📄 إنشاء package.json
         run: |
           cat > package.json << EOF
@@ -146,10 +165,7 @@ jobs:
           }
           EOF
 
-      # ═══════════════════════════════════════
-      # ⚙️ إعداد Capacitor الاحترافي
-      # ═══════════════════════════════════════
-      - name: ⚙️ إعداد Capacitor الاحترافي
+      - name: ⚙️ إعداد Capacitor - دعم التحميل الكامل
         run: |
           cat > capacitor.config.json << EOF
           {
@@ -169,8 +185,7 @@ jobs:
               "webContentsDebuggingEnabled": true,
               "keyboardStyle": "DARK",
               "resizeOnFullScreen": true,
-              "useLegacyBridge": false,
-              "backgroundColor": "${{ github.event.inputs.app_color }}"
+              "useLegacyBridge": false
             },
             "plugins": {
               "SplashScreen": {
@@ -198,107 +213,74 @@ jobs:
           }
           EOF
 
-      # ═══════════════════════════════════════
-      # 📦 تثبيت المكتبات
-      # ═══════════════════════════════════════
       - name: 📦 تثبيت المكتبات
         run: npm install
 
-      # ═══════════════════════════════════════
-      # 🤖 إنشاء مشروع Android
-      # ═══════════════════════════════════════
       - name: 🤖 إنشاء مشروع Android
         run: npx cap add android
 
-      # ═══════════════════════════════════════
-      # 🎨 إنشاء الأيقونات
-      # ═══════════════════════════════════════
       - name: 🎨 إنشاء الأيقونات بجميع المقاسات
         run: |
           ICON_FILE="${{ github.event.inputs.icon_file }}"
           
           if [ ! -f "$ICON_FILE" ]; then
-            echo "⚠️ ملف الأيقونة غير موجود، سيتم إنشاء أيقونة افتراضية"
-            
-            APP_COLOR="${{ github.event.inputs.app_color }}"
-            
-            mkdir -p android/app/src/main/res/mipmap-ldpi
-            mkdir -p android/app/src/main/res/mipmap-mdpi
-            mkdir -p android/app/src/main/res/mipmap-hdpi
-            mkdir -p android/app/src/main/res/mipmap-xhdpi
-            mkdir -p android/app/src/main/res/mipmap-xxhdpi
-            mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-            mkdir -p android/app/src/main/res/mipmap-anydpi-v26
-            mkdir -p android/app/src/main/res/drawable
-            
-            for size in 192 144 96 72 48 36; do
-              folder="mipmap-xxxhdpi"
-              case $size in
-                144) folder="mipmap-xxhdpi" ;;
-                96) folder="mipmap-xhdpi" ;;
-                72) folder="mipmap-hdpi" ;;
-                48) folder="mipmap-mdpi" ;;
-                36) folder="mipmap-ldpi" ;;
-              esac
-              
-              convert -size ${size}x${size} xc:"$APP_COLOR" \
-                -fill '#c9a84c' -draw "circle $(($size/2)),$(($size/2)) $(($size/2)),$(($size/4))" \
-                -fill '#000000' -gravity center -pointsize $(($size/4)) -annotate +0+2 "AI" \
-                "android/app/src/main/res/${folder}/ic_launcher.png" 2>/dev/null
-              
-              convert -size ${size}x${size} xc:"$APP_COLOR" \
-                -fill '#c9a84c' -draw "roundrectangle $(($size/8)),$(($size/8)) $(($size-$size/8)),$(($size-$size/8)) $(($size/6)),$(($size/6))" \
-                -fill '#000000' -gravity center -pointsize $(($size/4)) -annotate +0+2 "AI" \
-                "android/app/src/main/res/${folder}/ic_launcher_round.png" 2>/dev/null
-            done
-            
-            convert -size 192x192 xc:none \
-              -fill '#c9a84c' -draw "circle 96,96 96,48" \
-              -fill '#000000' -gravity center -pointsize 50 -annotate +0+2 "AI" \
-              "android/app/src/main/res/drawable/ic_launcher_foreground.png" 2>/dev/null
-            
-            echo "✅ تم إنشاء أيقونة افتراضية ذهبية"
-          else
-            echo "✅ تم العثور على ملف الأيقونة"
-            
-            rm -rf android/app/src/main/res/mipmap-*
-            rm -rf android/app/src/main/res/drawable/ic_launcher_*
-            
-            mkdir -p android/app/src/main/res/mipmap-ldpi
-            mkdir -p android/app/src/main/res/mipmap-mdpi
-            mkdir -p android/app/src/main/res/mipmap-hdpi
-            mkdir -p android/app/src/main/res/mipmap-xhdpi
-            mkdir -p android/app/src/main/res/mipmap-xxhdpi
-            mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-            mkdir -p android/app/src/main/res/mipmap-anydpi-v26
-            mkdir -p android/app/src/main/res/drawable
-            
-            convert $ICON_FILE -resize 36x36   android/app/src/main/res/mipmap-ldpi/ic_launcher.png
-            convert $ICON_FILE -resize 48x48   android/app/src/main/res/mipmap-mdpi/ic_launcher.png
-            convert $ICON_FILE -resize 72x72   android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-            convert $ICON_FILE -resize 96x96   android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
-            convert $ICON_FILE -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-            convert $ICON_FILE -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-            
-            cp $ICON_FILE android/app/src/main/res/drawable/ic_launcher_foreground.png
-            
-            echo "✅ تم إنشاء الأيقونات من الملف المرفوع"
+            echo "❌ خطأ: ملف الأيقونة $ICON_FILE غير موجود!"
+            echo "📁 البحث عن ملفات PNG في المشروع:"
+            find . -name "*.png" -not -path './node_modules/*' -not -path './.git/*'
+            exit 1
           fi
+          
+          echo "✅ تم العثور على ملف الأيقونة: $ICON_FILE"
+          echo "📏 حجم الصورة الأصلي: $(identify -format '%wx%h' $ICON_FILE)"
+          echo ""
+          
+          # حذف الأيقونات القديمة
+          rm -rf android/app/src/main/res/mipmap-*
+          rm -rf android/app/src/main/res/drawable/ic_launcher_*
+          rm -rf android/app/src/main/res/drawable-*
+          
+          # إنشاء جميع مجلدات المقاسات
+          mkdir -p android/app/src/main/res/mipmap-ldpi
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          mkdir -p android/app/src/main/res/drawable
+          
+          echo "🎨 جاري إنشاء الأيقونات بجميع المقاسات..."
+          echo ""
+          
+          echo "📱 أيقونات mipmap (للتطبيق):"
+          convert $ICON_FILE -resize 36x36   android/app/src/main/res/mipmap-ldpi/ic_launcher.png   && echo "  ✅ ldpi:    36x36"
+          convert $ICON_FILE -resize 48x48   android/app/src/main/res/mipmap-mdpi/ic_launcher.png   && echo "  ✅ mdpi:    48x48"
+          convert $ICON_FILE -resize 72x72   android/app/src/main/res/mipmap-hdpi/ic_launcher.png   && echo "  ✅ hdpi:    72x72"
+          convert $ICON_FILE -resize 96x96   android/app/src/main/res/mipmap-xhdpi/ic_launcher.png  && echo "  ✅ xhdpi:   96x96"
+          convert $ICON_FILE -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png && echo "  ✅ xxhdpi: 144x144"
+          convert $ICON_FILE -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png && echo "  ✅ xxxhdpi:192x192"
+          
+          echo ""
+          echo "🎯 الأيقونات الإضافية:"
+          cp $ICON_FILE android/app/src/main/res/drawable/ic_launcher_foreground.png && echo "  ✅ Foreground"
+          
+          echo ""
+          echo "✅ تم إنشاء جميع الأيقونات بنجاح!"
 
-      # ═══════════════════════════════════════
-      # 🎨 إنشاء Splash Screen
-      # ═══════════════════════════════════════
-      - name: 🎨 إنشاء Splash Screen فاخر
+      - name: 🎨 إنشاء Splash Screen
         run: |
+          ICON_FILE="${{ github.event.inputs.icon_file }}"
           APP_COLOR="${{ github.event.inputs.app_color }}"
+          
+          echo "🎨 جاري إنشاء Splash Screen..."
           
           mkdir -p android/app/src/main/res/drawable
           mkdir -p android/app/src/main/res/values
           
-          convert -size 300x300 xc:"$APP_COLOR" \
-            -fill '#c9a84c' -draw "circle 150,150 150,75" \
-            -fill '#000000' -gravity center -pointsize 60 -annotate +0+2 "AI" \
-            "android/app/src/main/res/drawable/splash.png" 2>/dev/null
+          convert $ICON_FILE -resize 250x250 -background "$APP_COLOR" -gravity center -extent 300x300 \
+                  android/app/src/main/res/drawable/splash.png
+          
+          echo "  ✅ تم إنشاء splash.png"
           
           cat > android/app/src/main/res/drawable/splash_background.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
@@ -308,11 +290,18 @@ jobs:
                       <solid android:color="${APP_COLOR}" />
                   </shape>
               </item>
-              <item android:gravity="center" android:width="200dp" android:height="200dp">
-                  <bitmap android:src="@drawable/splash" android:gravity="center" />
+              <item
+                  android:gravity="center"
+                  android:width="250dp"
+                  android:height="250dp">
+                  <bitmap
+                      android:src="@drawable/splash"
+                      android:gravity="center"
+                      android:filter="true" />
               </item>
           </layer-list>
           EOF
+          echo "  ✅ تم إنشاء splash_background.xml"
           
           cat > android/app/src/main/res/values/styles.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
@@ -320,43 +309,48 @@ jobs:
               <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
                   <item name="colorPrimary">${APP_COLOR}</item>
                   <item name="colorPrimaryDark">${APP_COLOR}</item>
-                  <item name="colorAccent">#c9a84c</item>
+                  <item name="colorAccent">${APP_COLOR}</item>
                   <item name="android:statusBarColor">${APP_COLOR}</item>
                   <item name="android:navigationBarColor">${APP_COLOR}</item>
-                  <item name="android:windowBackground">${APP_COLOR}</item>
+                  <item name="android:windowBackground">@color/windowBackground</item>
                   <item name="android:windowSoftInputMode">adjustResize</item>
               </style>
+              
               <style name="AppTheme.Splash" parent="AppTheme">
                   <item name="android:windowBackground">@drawable/splash_background</item>
+                  <item name="android:statusBarColor">${APP_COLOR}</item>
+                  <item name="android:navigationBarColor">${APP_COLOR}</item>
                   <item name="android:windowFullscreen">true</item>
+                  <item name="android:windowContentOverlay">@null</item>
+                  <item name="android:backgroundDimEnabled">false</item>
               </style>
           </resources>
           EOF
+          echo "  ✅ تم إنشاء styles.xml"
           
           cat > android/app/src/main/res/values/colors.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <color name="windowBackground">${APP_COLOR}</color>
               <color name="primaryColor">${APP_COLOR}</color>
-              <color name="accentColor">#c9a84c</color>
           </resources>
           EOF
+          echo "  ✅ تم إنشاء colors.xml"
           
           cat > android/app/src/main/res/values/strings.xml << EOF
-          <?xml version="1.0" encoding="utf-8"?>
+          <?xml version='1.0' encoding='utf-8'?>
           <resources>
               <string name="app_name">${{ github.event.inputs.app_name }}</string>
               <string name="title_activity_main">${{ github.event.inputs.app_name }}</string>
               <string name="package_name">${{ github.event.inputs.app_id }}</string>
           </resources>
           EOF
+          echo "  ✅ تم إنشاء strings.xml"
           
-          echo "✅ تم إنشاء Splash Screen"
+          echo ""
+          echo "✨ تم إنشاء Splash Screen بنجاح!"
 
-      # ═══════════════════════════════════════
-      # 🎨 أيقونة تكيفية
-      # ═══════════════════════════════════════
-      - name: 🎨 إنشاء الأيقونة التكيفية
+      - name: 🎨 إنشاء الأيقونة التكيفية (لأندرويد 8+)
         run: |
           cat > android/app/src/main/res/drawable/ic_launcher_background.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
@@ -383,10 +377,7 @@ jobs:
           
           echo "✅ تم إنشاء الأيقونة التكيفية"
 
-      # ═══════════════════════════════════════
-      # 🔧 إعداد AndroidManifest.xml
-      # ═══════════════════════════════════════
-      - name: 🔧 إعداد AndroidManifest.xml مع جميع الصلاحيات
+      - name: 🔧 إعداد ملف AndroidManifest.xml مع صلاحيات التحميل
         run: |
           MANIFEST_FILE="android/app/src/main/AndroidManifest.xml"
           
@@ -403,30 +394,29 @@ jobs:
             sed -i 's/android:windowSoftInputMode="[^"]*"//g' $MANIFEST_FILE
             sed -i 's/android:requestLegacyExternalStorage="[^"]*"//g' $MANIFEST_FILE
             
-            # تعديل application
+            # تعديل application مع دعم التخزين والتحميل
             sed -i 's|<application|<application android:usesCleartextTraffic="true" android:hardwareAccelerated="true" android:requestLegacyExternalStorage="true" android:theme="@style/AppTheme.Splash" android:windowSoftInputMode="adjustResize"|' $MANIFEST_FILE
             
-            # إضافة جميع الصلاحيات
+            # إضافة جميع الأذونات المطلوبة للتحميل
             if ! grep -q "INTERNET" $MANIFEST_FILE; then
-              sed -i 's|</manifest>|    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>\n    <uses-permission android:name="android.permission.RECORD_AUDIO"/>\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>\n    <uses-permission android:name="android.permission.CAMERA"/>\n    <uses-feature android:name="android.hardware.camera" android:required="false"/>\n    <uses-feature android:name="android.hardware.microphone" android:required="false"/>\n</manifest>|' $MANIFEST_FILE
+              sed -i 's|</manifest>|    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>\n</manifest>|' $MANIFEST_FILE
             fi
             
-            echo "✅ تم إضافة جميع الصلاحيات:"
+            echo "✅ تم تعديل AndroidManifest.xml مع صلاحيات التحميل الكاملة"
+            echo ""
+            echo "📋 الصلاحيات المضافة:"
             echo "  ✅ INTERNET"
+            echo "  ✅ ACCESS_NETWORK_STATE"
             echo "  ✅ WRITE_EXTERNAL_STORAGE"
-            echo "  ✅ RECORD_AUDIO"
-            echo "  ✅ MODIFY_AUDIO_SETTINGS"
-            echo "  ✅ CAMERA"
+            echo "  ✅ READ_EXTERNAL_STORAGE"
+            echo "  ✅ DOWNLOAD_WITHOUT_NOTIFICATION"
             echo "  ✅ requestLegacyExternalStorage"
           else
             echo "❌ ملف AndroidManifest.xml غير موجود!"
             exit 1
           fi
 
-      # ═══════════════════════════════════════
-      # ⌨️ إعداد MainActivity.java
-      # ═══════════════════════════════════════
-      - name: ⌨️ إعداد MainActivity.java مع دعم الصوت
+      - name: ⌨️ إضافة دعم الكيبورد والتحميل في MainActivity
         run: |
           MAIN_ACTIVITY="android/app/src/main/java/$(echo ${{ github.event.inputs.app_id }} | tr '.' '/')/MainActivity.java"
           
@@ -450,145 +440,125 @@ jobs:
               sed -i '/^package/a import androidx.core.view.WindowCompat;' $MAIN_ACTIVITY
             fi
             
-            if ! grep -q "import android.webkit.WebView;" $MAIN_ACTIVITY; then
-              sed -i '/^package/a import android.webkit.WebView;' $MAIN_ACTIVITY
-            fi
-            
             if ! grep -q "import android.webkit.WebSettings;" $MAIN_ACTIVITY; then
               sed -i '/^package/a import android.webkit.WebSettings;' $MAIN_ACTIVITY
             fi
             
-            if ! grep -q "import android.webkit.WebChromeClient;" $MAIN_ACTIVITY; then
-              sed -i '/^package/a import android.webkit.WebChromeClient;' $MAIN_ACTIVITY
+            if ! grep -q "import android.webkit.WebView;" $MAIN_ACTIVITY; then
+              sed -i '/^package/a import android.webkit.WebView;' $MAIN_ACTIVITY
             fi
             
-            # إضافة إعدادات WebView للصوت
-            if ! grep -q "setMediaPlaybackRequiresUserGesture" $MAIN_ACTIVITY; then
-              sed -i '/super.onCreate/a \        // دعم الصوت والوسائط في WebView\n        try {\n            WebView webView = new WebView(this);\n            WebSettings settings = webView.getSettings();\n            settings.setJavaScriptEnabled(true);\n            settings.setMediaPlaybackRequiresUserGesture(false);\n            settings.setAllowFileAccess(true);\n            settings.setAllowContentAccess(true);\n            settings.setDomStorageEnabled(true);\n            settings.setDatabaseEnabled(true);\n            settings.setLoadWithOverviewMode(true);\n            settings.setUseWideViewPort(true);\n            webView.setWebChromeClient(new WebChromeClient());\n        } catch (Exception e) {\n            e.printStackTrace();\n        }\n        \n        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {\n            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);\n        }' $MAIN_ACTIVITY
+            # إضافة إعدادات WebView للتحميل
+            if ! grep -q "getWindow().setSoftInputMode" $MAIN_ACTIVITY; then
+              sed -i '/super.onCreate/a \        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {\n            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);\n        }' $MAIN_ACTIVITY
             fi
             
-            echo "✅ تم تعديل MainActivity.java مع دعم كامل للصوت"
+            echo "✅ تم تعديل MainActivity.java"
           else
             echo "⚠️ لم يتم العثور على MainActivity.java"
           fi
 
-      # ═══════════════════════════════════════
-      # 🔄 مزامنة المشروع
-      # ═══════════════════════════════════════
       - name: 🔄 مزامنة المشروع
         run: |
           echo "🔄 جاري مزامنة الملفات..."
           npx cap sync android
-          echo "✅ تمت المزامنة"
+          
+          echo ""
+          echo "🔍 التحقق من الملفات:"
+          [ -f "android/app/src/main/res/drawable/splash.png" ] && echo "  ✅ splash.png"
+          [ -f "android/app/src/main/res/drawable/splash_background.xml" ] && echo "  ✅ splash_background.xml"
+          
+          if [ -d "android/app/src/main/assets" ]; then
+            echo "  💾 assets: $(find android/app/src/main/assets -type f | wc -l) ملفات"
+          fi
 
-      # ═══════════════════════════════════════
-      # 🔨 بناء APK
-      # ═══════════════════════════════════════
       - name: 🔨 بناء تطبيق APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # ═══════════════════════════════════════
-      # 📊 معلومات الملف الناتج
-      # ═══════════════════════════════════════
       - name: 📊 معلومات الملف الناتج
         run: |
           APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
           if [ -f "$APK_PATH" ]; then
-            echo "╔══════════════════════════════════════════╗"
-            echo "║  ✅ تم بناء APK بنجاح                  ║"
-            echo "╚══════════════════════════════════════════╝"
-            echo "📱 اسم التطبيق: ${{ github.event.inputs.app_name }}"
-            echo "📦 حجم الملف: $(du -h $APK_PATH | cut -f1)"
-            echo "📌 الإصدار: ${{ github.event.inputs.version_name }}"
+            echo "✅ تم بناء APK بنجاح"
+            echo "📱 حجم الملف: $(du -h $APK_PATH | cut -f1)"
+            echo "📋 اسم التطبيق: ${{ github.event.inputs.app_name }}"
+            echo "⬛ لون الخلفية: ${{ github.event.inputs.app_color }}"
             echo ""
-            echo "✨ الصلاحيات المدعومة:"
-            echo "  🌐 الإنترنت"
-            echo "  💾 التخزين والتحميل"
-            echo "  🎙️ الميكروفون والصوت"
-            echo "  📸 الكاميرا"
-            echo "  ⌨️ الكيبورد"
+            echo "✨ المميزات:"
+            echo "  🖼️ صورة واحدة فقط عند الفتح"
+            echo "  📥 دعم تحميل الصور داخل التطبيق"
+            echo "  🚫 بدون Spinner أو تحميل"
+            echo "  ⚡ فتح سريع ومباشر"
+            echo "  ⌨️ دعم الكيبورد"
           else
             echo "❌ فشل بناء APK"
             exit 1
           fi
 
-      # ═══════════════════════════════════════
-      # 📤 رفع إلى Artifacts
-      # ═══════════════════════════════════════
-      - name: 📤 رفع إلى Artifacts
+      - name: 📤 رفع ملف APK إلى Artifacts (نسخة احتياطية)
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.app_name }}-v${{ github.event.inputs.version_name }}
+          name: ${{ github.event.inputs.app_name }}-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 90
 
-      # ═══════════════════════════════════════
-      # 🚀 إنشاء Release
-      # ═══════════════════════════════════════
       - name: 🚀 إنشاء Release ورفع APK
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.event.inputs.version_name }}-${{ github.run_number }}
-          name: "👑 ${{ github.event.inputs.app_name }} v${{ github.event.inputs.version_name }}"
+          name: "👑 ${{ github.event.inputs.app_name }} v${{ github.event.inputs.version_name }} (Build #${{ github.run_number }})"
           body: |
             ## 👑 ${{ github.event.inputs.app_name }}
             
             ### 📋 معلومات التطبيق
-            | البند | التفاصيل |
-            |-------|----------|
-            | 📱 **الاسم** | ${{ github.event.inputs.app_name }} |
-            | 📌 **الإصدار** | ${{ github.event.inputs.version_name }} |
-            | 🔢 **البناء** | #${{ github.run_number }} |
-            | 📅 **التاريخ** | $(date +%Y-%m-%d) |
+            - **الإصدار**: ${{ github.event.inputs.version_name }}
+            - **Build**: #${{ github.run_number }}
+            - **التاريخ**: $(date +%Y-%m-%d)
             
             ### ✨ المميزات
-            - 🎨 تصميم أسطوري فاخر
-            - ⚡ أداء سريع ومباشر
-            - 📥 دعم تحميل الصور
-            - 🎙️ دعم الصوت والميكروفون
-            - 📸 دعم الكاميرا
-            - ⌨️ دعم الكيبورد
+            - 🖼️ صورة واحدة فقط عند الفتح (بدون Spinner)
+            - ⚡ فتح سريع ومباشر
+            - 📥 دعم تحميل الصور داخل التطبيق
+            - ⌨️ دعم الكيبورد بشكل كامل
+            - 🌐 يدعم جميع محتويات الويب
             - 💾 صلاحيات تخزين كاملة
             
-            ### 🔧 الصلاحيات
-            ```
-            ✅ INTERNET
-            ✅ WRITE_EXTERNAL_STORAGE
-            ✅ RECORD_AUDIO
-            ✅ CAMERA
-            ✅ MODIFY_AUDIO_SETTINGS
-            ```
-            
             ### 📥 التحميل
-            حمل ملف APK من الأسفل 👇
+            يمكنك تحميل ملف APK من الأسفل 👇
             
             ---
             *Built with ❤️ using GitHub Actions*
           files: android/app/build/outputs/apk/debug/app-debug.apk
           draft: false
           prerelease: false
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ═══════════════════════════════════════
-      # 🎉 اكتمال
-      # ═══════════════════════════════════════
       - name: 🎉 اكتمال البناء
         run: |
+          echo "╔════════════════════════════════════════════╗"
+          echo "║  👑  تم بناء التطبيق بنجاح!              ║"
+          echo "║  🖼️  تصميم فاخر                          ║"
+          echo "║  📥  دعم تحميل الصور                     ║"
+          echo "║  🚀  تم الرفع إلى Releases              ║"
+          echo "╚════════════════════════════════════════════╝"
           echo ""
-          echo "╔══════════════════════════════════════════════╗"
-          echo "║                                              ║"
-          echo "║  👑  تم بناء التطبيق بنجاح!                ║"
-          echo "║  🎨  تصميم أسطوري فاخر                     ║"
-          echo "║  🎙️  دعم كامل للصوت                        ║"
-          echo "║  📥  تحميل الصور يعمل                       ║"
-          echo "║  🚀  تم الرفع إلى Releases                 ║"
-          echo "║                                              ║"
-          echo "╚══════════════════════════════════════════════╝"
+          echo "📱 اسم التطبيق: ${{ github.event.inputs.app_name }}"
+          echo "📌 الإصدار: ${{ github.event.inputs.version_name }}"
+          echo "⬛ لون الخلفية: ${{ github.event.inputs.app_color }}"
           echo ""
-          echo "📥 التحميل متاح في:"
-          echo "  🚀 Releases: ${{ github.server_url }}/${{ github.repository }}/releases"
-          echo "  📦 Artifacts: في تبويب Actions"
+          echo "✨ طريقة عمل التطبيق:"
+          echo "  1️⃣ تفتح التطبيق"
+          echo "  2️⃣ تظهر الأيقونة في المنتصف"
+          echo "  3️⃣ يفتح التطبيق مباشرة"
+          echo "  4️⃣ تولد الصورة وتضغط تحميل"
+          echo "  5️⃣ يتم حفظ الصورة بنجاح ✅"
+          echo ""
+          echo "📥 يمكنك تحميل الـ APK من:"
+          echo "  🚀 Releases (رابط مباشر)"
+          echo "  📦 Artifacts (نسخة احتياطية)"
