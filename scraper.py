@@ -1,504 +1,487 @@
 import os
 
 def create_website_files():
-    """إنشاء تطبيق Text to Speech احترافي"""
+    """إنشاء تطبيق Voice AI الأسطوري الفاخر"""
     
     os.makedirs("www", exist_ok=True)
     
-    html_content = '''<!DOCTYPE html>
+    html_content = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Voice AI - Text to Speech</title>
+    <title>Voice AI | Legendary</title>
     <style>
         :root {
-            --bg: #0a0a0a;
-            --surface: #111;
-            --border: #222;
+            --bg: #000;
+            --surface: #080808;
+            --card: #0d0d0d;
+            --border: #1a1a1a;
             --gold: #c9a84c;
             --gold-light: #e2c97e;
-            --gold-glow: rgba(201, 168, 76, 0.3);
+            --gold-dark: #8b7300;
+            --gold-glow: rgba(201,168,76,0.5);
             --text: #e0d5c0;
             --text-dim: #6b6355;
+            --accent: #ff4444;
+            --green: #4caf50;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: var(--bg);
+            background: #000;
             color: var(--text);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 12px;
             background-image: 
-                radial-gradient(circle at 30% 0%, rgba(201,168,76,0.06) 0%, transparent 50%),
-                radial-gradient(circle at 70% 100%, rgba(201,168,76,0.04) 0%, transparent 50%);
+                radial-gradient(ellipse at 30% 0%, rgba(201,168,76,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 100%, rgba(201,168,76,0.05) 0%, transparent 50%);
+            overflow-x: hidden;
         }
 
-        .app {
-            width: 100%;
-            max-width: 460px;
+        .bg-particles {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
         }
+
+        .particle {
+            position: absolute; background: var(--gold);
+            border-radius: 50%; opacity: 0;
+            animation: floatUp 5s ease-in infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.1; }
+            100% { transform: translateY(-10vh) scale(2.5); opacity: 0; }
+        }
+
+        .app { width: 100%; max-width: 460px; position: relative; z-index: 1; }
 
         /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
+        .header { text-align: center; margin-bottom: 22px; position: relative; }
+
+        .crown-icon {
+            position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+            font-size: 26px; animation: crownFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes crownFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+            25% { transform: translateX(-50%) translateY(-4px) rotate(-4deg); }
+            75% { transform: translateX(-50%) translateY(-2px) rotate(4deg); }
         }
 
         .logo-container {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
+            width: 90px; height: 90px; margin: 0 auto 14px; position: relative;
         }
 
-        .logo-circle {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            box-shadow: 0 0 40px var(--gold-glow), 0 10px 30px rgba(0,0,0,0.5);
-            animation: float 3s ease-in-out infinite;
-            position: relative;
-            z-index: 2;
+        .logo-outer-ring {
+            position: absolute; inset: -10px;
+            border: 1px solid rgba(201,168,76,0.15); border-radius: 50%;
+            animation: outerSpin 20s linear infinite;
         }
 
-        .logo-ring {
-            position: absolute;
-            inset: -8px;
-            border: 2px solid rgba(201,168,76,0.3);
-            border-radius: 32px;
-            animation: pulse-ring 2s ease-in-out infinite;
-            z-index: 1;
+        .logo-middle-ring {
+            position: absolute; inset: -5px;
+            border: 2px dashed rgba(201,168,76,0.2); border-radius: 50%;
+            animation: outerSpin 15s linear infinite reverse;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+        @keyframes outerSpin { to { transform: rotate(360deg); } }
+
+        .logo-core {
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 40% 40%, #1a1a0a, #000);
+            border: 2px solid var(--gold); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 38px;
+            box-shadow: 0 0 50px var(--gold-glow), 0 0 100px rgba(201,168,76,0.15);
+            animation: logoPulse 3s ease-in-out infinite;
+            position: relative; z-index: 3;
         }
 
-        @keyframes pulse-ring {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.6; }
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 0 50px var(--gold-glow), 0 0 100px rgba(201,168,76,0.15); }
+            50% { box-shadow: 0 0 70px var(--gold-glow), 0 0 130px rgba(201,168,76,0.25); }
+        }
+
+        .logo-spark {
+            position: absolute; width: 3px; height: 3px;
+            background: var(--gold-light); border-radius: 50%;
+            animation: sparkOrbit 2.5s ease-in-out infinite; z-index: 4;
+        }
+        .logo-spark:nth-child(1) { top: 5px; left: 20px; animation-delay: 0s; }
+        .logo-spark:nth-child(2) { top: 15px; right: 8px; animation-delay: 0.5s; }
+        .logo-spark:nth-child(3) { bottom: 10px; left: 10px; animation-delay: 1s; }
+        .logo-spark:nth-child(4) { bottom: 5px; right: 18px; animation-delay: 1.5s; }
+
+        @keyframes sparkOrbit {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(2.5); }
         }
 
         .title {
-            font-size: 30px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 32px; font-weight: 900; letter-spacing: 4px;
+            background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dark) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+        }
+
+        .title-glow {
+            width: 80px; height: 2px; margin: 4px auto 0;
+            background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+            filter: blur(2px);
         }
 
         .subtitle {
-            font-size: 10px;
-            color: var(--text-dim);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-top: 4px;
+            font-size: 10px; color: var(--text-dim);
+            letter-spacing: 6px; text-transform: uppercase; margin-top: 4px;
         }
 
-        .line {
-            width: 60px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 14px auto;
+        .divider {
+            display: flex; align-items: center; gap: 10px;
+            margin: 14px auto; width: fit-content;
         }
+        .divider-line {
+            width: 25px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold));
+        }
+        .divider-line:last-child { background: linear-gradient(90deg, var(--gold), transparent); }
+        .divider-diamond { font-size: 8px; color: var(--gold); }
 
         /* Card */
         .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 24px 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02) inset;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 22px 18px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02) inset;
+            position: relative; overflow: hidden;
+        }
+
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.6), var(--gold), rgba(201,168,76,0.6), transparent);
         }
 
         /* Text Area */
-        .textarea-container {
-            position: relative;
-            margin-bottom: 16px;
-        }
+        .textarea-container { position: relative; margin-bottom: 16px; }
 
         textarea {
-            width: 100%;
-            height: 150px;
-            padding: 16px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-size: 14px;
-            border-radius: 16px;
-            font-family: inherit;
-            resize: none;
-            transition: all 0.3s;
-            line-height: 1.6;
-            outline: none;
+            width: 100%; height: 140px; padding: 16px 50px 16px 16px;
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); font-size: 14px; border-radius: 16px;
+            font-family: inherit; resize: none; transition: all 0.4s;
+            line-height: 1.7; outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3) inset;
         }
 
         textarea:focus {
             border-color: var(--gold);
-            box-shadow: 0 0 0 4px var(--gold-glow);
+            box-shadow: 0 0 0 5px var(--gold-glow), 0 0 40px rgba(201,168,76,0.1), 0 4px 15px rgba(0,0,0,0.3) inset;
         }
 
-        textarea::placeholder {
-            color: #2a2520;
+        textarea::placeholder { color: #2a2520; }
+
+        .textarea-icon {
+            position: absolute; bottom: 14px; right: 14px;
+            font-size: 20px; opacity: 0.4; transition: 0.3s;
         }
+
+        textarea:focus ~ .textarea-icon { opacity: 0.8; }
 
         .char-count {
-            position: absolute;
-            bottom: 12px;
-            right: 16px;
-            font-size: 10px;
-            color: var(--text-dim);
-            letter-spacing: 1px;
+            position: absolute; top: -20px; right: 4px;
+            font-size: 9px; color: var(--text-dim); letter-spacing: 2px;
         }
 
-        .char-count.warning {
-            color: #ff6b6b;
+        .char-count.warning { color: #ff6b6b; }
+
+        /* Quick Prompts */
+        .quick-prompts {
+            display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;
         }
 
-        /* Voice Settings */
-        .settings-section {
-            margin-bottom: 16px;
+        .quick-chip {
+            padding: 6px 12px; background: rgba(201,168,76,0.05);
+            border: 1px solid rgba(201,168,76,0.2); color: var(--text-dim);
+            cursor: pointer; border-radius: 20px; font-size: 9px;
+            letter-spacing: 1px; transition: all 0.3s;
         }
 
-        .settings-label {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--text-dim);
-            margin-bottom: 10px;
+        .quick-chip:hover {
+            background: rgba(201,168,76,0.12); border-color: var(--gold); color: var(--gold);
         }
 
-        .settings-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        /* Section Label */
+        .section-label {
+            font-size: 8px; text-transform: uppercase; letter-spacing: 5px;
+            color: var(--text-dim); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-label::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, rgba(201,168,76,0.3), transparent);
         }
 
-        .setting-item {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 10px 12px;
-            cursor: pointer;
-            transition: all 0.3s;
+        /* Language */
+        .lang-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 6px; margin-bottom: 14px;
         }
 
-        .setting-item:hover {
-            border-color: #444;
+        .lang-btn {
+            padding: 12px 6px; background: var(--bg);
+            border: 1px solid var(--border); color: var(--text-dim);
+            cursor: pointer; border-radius: 10px; font-size: 9px;
+            font-weight: 600; transition: all 0.3s; text-align: center;
         }
 
-        .setting-item.active {
-            border-color: var(--gold);
-            background: rgba(201,168,76,0.05);
+        .lang-btn .flag { display: block; font-size: 20px; margin-bottom: 3px; }
+
+        .lang-btn:hover { border-color: #444; }
+        .lang-btn.active {
+            border-color: var(--gold); color: var(--gold);
+            background: rgba(201,168,76,0.1); box-shadow: 0 0 15px var(--gold-glow);
         }
 
-        .setting-label-small {
-            font-size: 8px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .setting-value {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .setting-item.active .setting-value {
-            color: var(--gold);
-        }
-
-        /* Rate Slider */
+        /* Sliders */
         .slider-group {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;
         }
 
         .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 8px;
         }
 
         .slider-label {
-            font-size: 9px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-size: 9px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;
         }
 
         .slider-value {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--gold);
+            font-size: 13px; font-weight: 700; color: var(--gold);
         }
 
         input[type="range"] {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            background: var(--border);
-            border-radius: 3px;
-            outline: none;
-            cursor: pointer;
+            width: 100%; height: 6px; -webkit-appearance: none;
+            background: var(--border); border-radius: 3px; outline: none; cursor: pointer;
         }
 
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+            -webkit-appearance: none; width: 26px; height: 26px;
             background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 10px var(--gold-glow);
-            border: 2px solid #000;
+            border-radius: 50%; cursor: pointer;
+            box-shadow: 0 2px 15px var(--gold-glow); border: 2px solid #000;
         }
 
         /* Buttons */
-        .buttons-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
+        .buttons-row { display: flex; gap: 8px; margin-bottom: 14px; }
 
         .btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            cursor: pointer;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s;
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            flex: 1; padding: 15px; border: none; cursor: pointer;
+            border-radius: 14px; font-weight: 700; font-size: 12px;
+            letter-spacing: 2px; text-transform: uppercase;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit; display: flex; align-items: center;
+            justify-content: center; gap: 6px; position: relative; overflow: hidden;
         }
 
         .btn-speak {
-            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
-            color: #000;
-            box-shadow: 0 4px 20px var(--gold-glow);
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold), var(--gold-dark));
+            background-size: 200% 200%;
+            color: #000; box-shadow: 0 6px 25px var(--gold-glow);
+            animation: gradientShift 4s ease-in-out infinite;
+            flex: 2;
         }
 
-        .btn-speak:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px var(--gold-glow);
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
-        .btn-speak:active {
-            transform: scale(0.96);
-        }
+        .btn-speak:hover { transform: translateY(-3px); box-shadow: 0 12px 35px var(--gold-glow); }
+        .btn-speak:active { transform: scale(0.94); }
 
         .btn-speak:disabled {
-            background: #1a1a1a;
-            color: #333;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
+            background: #1a1a1a; color: #333; box-shadow: none;
+            cursor: not-allowed; transform: none; animation: none;
         }
 
         .btn-speak.speaking {
             background: linear-gradient(135deg, #8b0000, #cc0000, #8b0000);
-            animation: glow-red 1s ease-in-out infinite;
+            animation: glowRed 1s ease-in-out infinite;
         }
 
-        @keyframes glow-red {
-            0%, 100% { box-shadow: 0 0 20px rgba(255,0,0,0.3); }
-            50% { box-shadow: 0 0 40px rgba(255,0,0,0.6); }
+        @keyframes glowRed {
+            0%, 100% { box-shadow: 0 0 25px rgba(255,0,0,0.3); }
+            50% { box-shadow: 0 0 50px rgba(255,0,0,0.6); }
         }
 
         .btn-stop {
-            background: transparent;
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            display: none;
+            background: transparent; border: 2px solid #ff4444;
+            color: #ff4444; display: none;
         }
 
-        .btn-stop.show {
-            display: flex;
-        }
-
-        .btn-stop:hover {
-            background: rgba(255,0,0,0.1);
-        }
+        .btn-stop.show { display: flex; }
+        .btn-stop:hover { background: rgba(255,0,0,0.1); box-shadow: 0 0 20px rgba(255,0,0,0.3); }
 
         .btn-clear {
-            background: transparent;
-            border: 1px solid var(--border);
+            background: transparent; border: 1px solid var(--border);
             color: var(--text-dim);
         }
-
-        .btn-clear:hover {
-            border-color: #555;
-            color: var(--text);
-        }
+        .btn-clear:hover { border-color: #555; color: var(--text); }
 
         /* Status */
         .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 10px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.3s;
-            min-height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 10px; border-radius: 10px;
+            font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+            transition: all 0.4s; min-height: 30px; margin-bottom: 4px;
         }
 
-        .status-bar.idle {
-            color: var(--text-dim);
-            background: transparent;
-        }
-
-        .status-bar.speaking {
-            color: #ff6b6b;
-            background: rgba(255,0,0,0.05);
-        }
-
-        .status-bar.done {
-            color: #4caf50;
-            background: rgba(76,175,80,0.05);
-        }
+        .status-bar.idle { color: var(--text-dim); }
+        .status-bar.speaking { color: #ff6b6b; background: rgba(255,0,0,0.04); }
+        .status-bar.done { color: #4caf50; background: rgba(76,175,80,0.04); }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-dim);
-            transition: all 0.3s;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--text-dim); transition: all 0.3s;
         }
-
-        .status-bar.speaking .status-dot {
-            background: #ff4444;
-            animation: blink 0.5s infinite;
-        }
-
-        .status-bar.done .status-dot {
-            background: #4caf50;
-        }
+        .status-bar.speaking .status-dot { background: #ff4444; animation: blink 0.4s infinite; }
+        .status-bar.done .status-dot { background: #4caf50; }
 
         @keyframes blink {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            50% { opacity: 0.2; }
         }
 
-        /* Waves Animation */
+        /* Waves - Enhanced */
         .waves-container {
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 3px;
-            height: 40px;
-            margin-top: 8px;
+            display: none; justify-content: center; align-items: flex-end;
+            gap: 4px; height: 50px; padding: 0 10px;
         }
 
-        .waves-container.show {
-            display: flex;
-        }
+        .waves-container.show { display: flex; }
 
         .wave-bar {
-            width: 3px;
+            width: 4px; border-radius: 2px;
             background: linear-gradient(to top, var(--gold), var(--gold-light));
-            border-radius: 2px;
-            animation: wave 0.8s ease-in-out infinite;
+            animation: waveDance 0.7s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--gold-glow);
         }
 
-        .wave-bar:nth-child(1) { height: 20px; animation-delay: 0s; }
-        .wave-bar:nth-child(2) { height: 35px; animation-delay: 0.1s; }
-        .wave-bar:nth-child(3) { height: 25px; animation-delay: 0.2s; }
-        .wave-bar:nth-child(4) { height: 40px; animation-delay: 0.3s; }
-        .wave-bar:nth-child(5) { height: 30px; animation-delay: 0.4s; }
-        .wave-bar:nth-child(6) { height: 20px; animation-delay: 0.5s; }
-        .wave-bar:nth-child(7) { height: 35px; animation-delay: 0.6s; }
-        .wave-bar:nth-child(8) { height: 25px; animation-delay: 0.7s; }
+        .wave-bar:nth-child(1) { height: 25px; animation-delay: 0s; }
+        .wave-bar:nth-child(2) { height: 40px; animation-delay: 0.08s; }
+        .wave-bar:nth-child(3) { height: 30px; animation-delay: 0.16s; }
+        .wave-bar:nth-child(4) { height: 50px; animation-delay: 0.24s; }
+        .wave-bar:nth-child(5) { height: 35px; animation-delay: 0.32s; }
+        .wave-bar:nth-child(6) { height: 45px; animation-delay: 0.4s; }
+        .wave-bar:nth-child(7) { height: 28px; animation-delay: 0.48s; }
+        .wave-bar:nth-child(8) { height: 38px; animation-delay: 0.56s; }
+        .wave-bar:nth-child(9) { height: 22px; animation-delay: 0.64s; }
+        .wave-bar:nth-child(10) { height: 42px; animation-delay: 0.72s; }
 
-        @keyframes wave {
+        @keyframes waveDance {
             0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(0.4); }
+            50% { transform: scaleY(0.3); }
         }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 40px; left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: #0a0a0a; border: 1px solid var(--gold);
+            color: var(--gold); padding: 14px 28px;
+            border-radius: 40px; font-size: 12px; letter-spacing: 2px;
+            z-index: 999; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 40px var(--gold-glow);
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
 
         /* Footer */
         .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 9px;
-            color: #1a1a1a;
-            letter-spacing: 2px;
+            text-align: center; margin-top: 18px;
+            font-size: 9px; color: #111; letter-spacing: 3px;
         }
-
-        .footer span {
-            color: var(--gold);
-        }
+        .footer span { color: var(--gold); }
+        .footer .dot { color: var(--gold); margin: 0 6px; }
     </style>
 </head>
 <body>
+    <!-- Particles -->
+    <div class="bg-particles" id="particles"></div>
+
     <div class="app">
         <!-- Header -->
         <div class="header">
+            <div class="crown-icon">👑</div>
             <div class="logo-container">
-                <div class="logo-ring"></div>
-                <div class="logo-circle">🎙️</div>
+                <div class="logo-outer-ring"></div>
+                <div class="logo-middle-ring"></div>
+                <div class="logo-core">
+                    🎙️
+                    <span class="logo-spark"></span>
+                    <span class="logo-spark"></span>
+                    <span class="logo-spark"></span>
+                    <span class="logo-spark"></span>
+                </div>
             </div>
             <h1 class="title">VOICE AI</h1>
-            <p class="subtitle">Text to Speech</p>
-            <div class="line"></div>
+            <div class="title-glow"></div>
+            <p class="subtitle">✦ Legendary Edition ✦</p>
+            <div class="divider">
+                <span class="divider-line"></span>
+                <span class="divider-diamond">◆</span>
+                <span class="divider-line"></span>
+            </div>
         </div>
 
         <!-- Card -->
         <div class="card">
             <!-- Text Input -->
             <div class="textarea-container">
-                <textarea id="textInput" placeholder="Type your text here..." maxlength="500" oninput="updateCharCount()"></textarea>
                 <span class="char-count" id="charCount">0 / 500</span>
+                <textarea id="textInput" placeholder="Type anything and I'll speak it..." maxlength="500" oninput="updateCharCount()"></textarea>
+                <span class="textarea-icon">✍️</span>
             </div>
 
-            <!-- Voice Settings -->
-            <div class="settings-section">
-                <p class="settings-label">✦ Voice Settings</p>
-                <div class="settings-row">
-                    <div class="setting-item active" data-lang="en-US" onclick="setLanguage('en-US', this)">
-                        <span class="setting-label-small">Language</span>
-                        <span class="setting-value">🇺🇸 English</span>
-                    </div>
-                    <div class="setting-item" data-lang="ar-SA" onclick="setLanguage('ar-SA', this)">
-                        <span class="setting-label-small">Language</span>
-                        <span class="setting-value">🇸🇦 العربية</span>
-                    </div>
-                </div>
+            <!-- Quick Prompts -->
+            <div class="quick-prompts">
+                <span class="quick-chip" onclick="setText('Hello! How are you today?')">👋 Greeting</span>
+                <span class="quick-chip" onclick="setText('Welcome to Voice AI, the legendary text to speech app.')">🎉 Welcome</span>
+                <span class="quick-chip" onclick="setText('The future is now. Technology makes anything possible.')">🚀 Future</span>
+                <span class="quick-chip" onclick="setText('Once upon a time, in a land far away...')">📖 Story</span>
             </div>
 
-            <!-- Rate Slider -->
+            <!-- Language -->
+            <p class="section-label">✦ Language</p>
+            <div class="lang-grid">
+                <button class="lang-btn active" data-lang="en-US" onclick="setLanguage('en-US', this)">
+                    <span class="flag">🇺🇸</span>English
+                </button>
+                <button class="lang-btn" data-lang="ar-SA" onclick="setLanguage('ar-SA', this)">
+                    <span class="flag">🇸🇦</span>العربية
+                </button>
+                <button class="lang-btn" data-lang="fr-FR" onclick="setLanguage('fr-FR', this)">
+                    <span class="flag">🇫🇷</span>Français
+                </button>
+                <button class="lang-btn" data-lang="es-ES" onclick="setLanguage('es-ES', this)">
+                    <span class="flag">🇪🇸</span>Español
+                </button>
+            </div>
+
+            <!-- Speed Slider -->
             <div class="slider-group">
                 <div class="slider-header">
-                    <span class="slider-label">Speed</span>
+                    <span class="slider-label">⚡ Speed</span>
                     <span class="slider-value" id="rateValue">1.0x</span>
                 </div>
                 <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1" oninput="updateRate()">
@@ -507,7 +490,7 @@ def create_website_files():
             <!-- Pitch Slider -->
             <div class="slider-group">
                 <div class="slider-header">
-                    <span class="slider-label">Pitch</span>
+                    <span class="slider-label">🎵 Pitch</span>
                     <span class="slider-value" id="pitchValue">1.0</span>
                 </div>
                 <input type="range" id="pitchSlider" min="0.5" max="2" step="0.1" value="1" oninput="updatePitch()">
@@ -522,7 +505,7 @@ def create_website_files():
                     ⏹ Stop
                 </button>
                 <button class="btn btn-clear" onclick="clearText()">
-                    🗑 Clear
+                    🗑
                 </button>
             </div>
 
@@ -534,121 +517,109 @@ def create_website_files():
 
             <!-- Waves -->
             <div class="waves-container" id="wavesContainer">
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
-                <div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
             </div>
         </div>
 
         <!-- Footer -->
-        <p class="footer">Powered by <span>Web Speech API</span> • No Internet Required</p>
+        <p class="footer">
+            <span>◆</span> Powered by <span>Web Speech API</span> <span class="dot">•</span> No Internet <span>◆</span>
+        </p>
     </div>
 
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
     <script>
-        let synth = window.speechSynthesis;
+        // ==================== PARTICLES ====================
+        (function() {
+            const c = document.getElementById('particles');
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                const s = Math.random() * 3 + 1;
+                p.style.width = s + 'px'; p.style.height = s + 'px';
+                p.style.animationDuration = (Math.random() * 7 + 4) + 's';
+                p.style.animationDelay = (Math.random() * 5) + 's';
+                c.appendChild(p);
+            }
+        })();
+
+        // ==================== STATE ====================
+        const synth = window.speechSynthesis;
         let currentUtterance = null;
         let isSpeaking = false;
         let selectedLanguage = 'en-US';
         let rate = 1.0;
         let pitch = 1.0;
-
-        // Initialize voices
         let voices = [];
-        
-        function loadVoices() {
-            voices = synth.getVoices();
-        }
-        
+
+        function loadVoices() { voices = synth.getVoices(); }
         loadVoices();
-        if (synth.onvoiceschanged !== undefined) {
-            synth.onvoiceschanged = loadVoices;
+        if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+
+        // ==================== UI FUNCTIONS ====================
+        function setText(t) {
+            document.getElementById('textInput').value = t;
+            updateCharCount();
         }
 
-        // Update character count
         function updateCharCount() {
-            const textarea = document.getElementById('textInput');
-            const count = textarea.value.length;
-            const charCount = document.getElementById('charCount');
-            charCount.textContent = count + ' / 500';
-            
-            if (count >= 450) {
-                charCount.classList.add('warning');
-            } else {
-                charCount.classList.remove('warning');
-            }
+            const ta = document.getElementById('textInput');
+            const c = ta.value.length;
+            const cc = document.getElementById('charCount');
+            cc.textContent = c + ' / 500';
+            cc.classList.toggle('warning', c >= 450);
         }
 
-        // Set language
-        function setLanguage(lang, element) {
+        function setLanguage(lang, el) {
             selectedLanguage = lang;
-            document.querySelectorAll('.setting-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
         }
 
-        // Update rate
         function updateRate() {
             rate = document.getElementById('rateSlider').value;
             document.getElementById('rateValue').textContent = rate + 'x';
         }
 
-        // Update pitch
         function updatePitch() {
             pitch = document.getElementById('pitchSlider').value;
             document.getElementById('pitchValue').textContent = pitch;
         }
 
-        // Speak
+        // ==================== SPEAK ====================
         function speak() {
             const text = document.getElementById('textInput').value.trim();
-            if (!text) return;
+            if (!text) return showToast('⚠️ Please enter text');
 
-            // Stop current speech
             synth.cancel();
-
-            // Create utterance
             currentUtterance = new SpeechSynthesisUtterance(text);
             currentUtterance.lang = selectedLanguage;
             currentUtterance.rate = parseFloat(rate);
             currentUtterance.pitch = parseFloat(pitch);
 
-            // Find best voice
             const voice = voices.find(v => v.lang.startsWith(selectedLanguage.split('-')[0])) || voices[0];
             if (voice) currentUtterance.voice = voice;
 
-            // Events
-            currentUtterance.onstart = function() {
-                isSpeaking = true;
-                updateUI('speaking');
-            };
+            currentUtterance.onstart = () => { isSpeaking = true; updateUI('speaking'); };
+            currentUtterance.onend = () => { isSpeaking = false; updateUI('done'); setTimeout(() => updateUI('idle'), 2000); };
+            currentUtterance.onerror = () => { isSpeaking = false; updateUI('idle'); };
 
-            currentUtterance.onend = function() {
-                isSpeaking = false;
-                updateUI('done');
-                setTimeout(() => updateUI('idle'), 2000);
-            };
-
-            currentUtterance.onerror = function() {
-                isSpeaking = false;
-                updateUI('idle');
-            };
-
-            // Speak
             synth.speak(currentUtterance);
         }
 
-        // Stop speaking
         function stopSpeaking() {
             synth.cancel();
             isSpeaking = false;
             updateUI('idle');
         }
 
-        // Clear text
         function clearText() {
             synth.cancel();
             document.getElementById('textInput').value = '';
@@ -656,42 +627,45 @@ def create_website_files():
             updateUI('idle');
         }
 
-        // Update UI
         function updateUI(state) {
-            const speakBtn = document.getElementById('speakBtn');
-            const stopBtn = document.getElementById('stopBtn');
+            const sb = document.getElementById('speakBtn');
+            const stb = document.getElementById('stopBtn');
             const statusBar = document.getElementById('statusBar');
-            const wavesContainer = document.getElementById('wavesContainer');
-            const statusText = statusBar.querySelector('.status-text');
+            const waves = document.getElementById('wavesContainer');
+            const st = statusBar.querySelector('.status-text');
 
             statusBar.className = 'status-bar ' + state;
-            stopBtn.classList.remove('show');
+            stb.classList.remove('show');
+            waves.classList.remove('show');
+            sb.classList.remove('speaking');
 
             switch(state) {
                 case 'speaking':
-                    speakBtn.classList.add('speaking');
-                    speakBtn.innerHTML = '🔊 Speaking...';
-                    speakBtn.disabled = true;
-                    stopBtn.classList.add('show');
-                    wavesContainer.classList.add('show');
-                    statusText.textContent = 'Speaking';
+                    sb.classList.add('speaking');
+                    sb.innerHTML = '🔊 Speaking...';
+                    sb.disabled = true;
+                    stb.classList.add('show');
+                    waves.classList.add('show');
+                    st.textContent = 'Speaking';
                     break;
-
                 case 'done':
-                    speakBtn.classList.remove('speaking');
-                    speakBtn.innerHTML = '🔊 Speak';
-                    speakBtn.disabled = false;
-                    wavesContainer.classList.remove('show');
-                    statusText.textContent = 'Done ✓';
+                    sb.innerHTML = '🔊 Speak';
+                    sb.disabled = false;
+                    st.textContent = 'Done ✓';
                     break;
-
                 default:
-                    speakBtn.classList.remove('speaking');
-                    speakBtn.innerHTML = '🔊 Speak';
-                    speakBtn.disabled = false;
-                    wavesContainer.classList.remove('show');
-                    statusText.textContent = 'Ready';
+                    sb.innerHTML = '🔊 Speak';
+                    sb.disabled = false;
+                    st.textContent = 'Ready';
             }
+        }
+
+        // ==================== TOAST ====================
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         }
     </script>
 </body>
@@ -700,9 +674,26 @@ def create_website_files():
     with open("www/index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print("✅ تم إنشاء تطبيق Voice AI الاحترافي")
+    print("╔══════════════════════════════════════════╗")
+    print("║  👑 Voice AI - Legendary Edition       ║")
+    print("║  🎙️ تم الإنشاء بنجاح                  ║")
+    print("╚══════════════════════════════════════════╝")
     print(f"📁 www/index.html")
-    print(f"💾 الحجم: {os.path.getsize('www/index.html')/1024:.1f} KB")
+    print(f"💾 حجم الملف: {os.path.getsize('www/index.html')/1024:.1f} KB")
+    print("")
+    print("🎙️ المميزات الأسطورية:")
+    print("  👑 تاج متحرك")
+    print("  ✨ جسيمات ذهبية عائمة")
+    print("  💫 حلقات دائرية حول الشعار")
+    print("  ⚡ ومضات بريق متحركة")
+    print("  🌍 4 لغات (English, عربي, Français, Español)")
+    print("  💬 اقتراحات سريعة للنص")
+    print("  🎵 تحكم في السرعة والنغمة")
+    print("  📊 عداد حروف")
+    print("  🌊 10 أعمدة موجات صوتية")
+    print("  🔔 Toast notifications")
+    print("  🔴 زر الإيقاف بتأثير أحمر")
+    print("  🟢 حالة Done باللون الأخضر")
 
 if __name__ == "__main__":
     create_website_files()
