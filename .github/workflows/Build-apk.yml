@@ -1,4 +1,4 @@
-name: 🃏 Build APK - Joker
+name: 👑 Build APK - Ultra
 
 on:
   workflow_dispatch:
@@ -6,12 +6,12 @@ on:
       app_name:
         description: '📱 اسم التطبيق'
         required: true
-        default: 'جوكر'
+        default: 'Dark AI'
         type: string
       app_id:
-        description: '🆔 App ID (مثال: com.joker.app)'
+        description: '🆔 App ID (مثال: com.darkai.app)'
         required: true
-        default: 'com.joker.app'
+        default: 'com.darkai.app'
         type: string
       app_color:
         description: '🎨 لون خلفية التطبيق (مثال: #000000 للأسود)'
@@ -33,13 +33,18 @@ on:
         required: false
         default: '2000'
         type: string
+      version_name:
+        description: '📌 إصدار التطبيق (مثال: 1.0.0)'
+        required: false
+        default: '1.0.0'
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   build-apk:
-    name: 📱 بناء تطبيق ${{ github.event.inputs.app_name }}
+    name: 👑 بناء تطبيق ${{ github.event.inputs.app_name }}
     runs-on: ubuntu-latest
     
     steps:
@@ -154,12 +159,13 @@ jobs:
               "@capacitor/app": "^5.0.0",
               "@capacitor/status-bar": "^5.0.0",
               "@capacitor/splash-screen": "^5.0.0",
-              "@capacitor/keyboard": "^5.0.0"
+              "@capacitor/keyboard": "^5.0.0",
+              "@capacitor/share": "^5.0.0"
             }
           }
           EOF
 
-      - name: ⚙️ إعداد Capacitor - صورة واحدة فقط
+      - name: ⚙️ إعداد Capacitor - دعم التحميل الكامل
         run: |
           cat > capacitor.config.json << EOF
           {
@@ -168,16 +174,18 @@ jobs:
             "webDir": "www",
             "bundledWebRuntime": false,
             "server": {
-              "androidScheme": "http",
+              "androidScheme": "https",
               "allowNavigation": ["*"],
-              "cleartext": true
+              "cleartext": true,
+              "hostname": "localhost"
             },
             "android": {
               "allowMixedContent": true,
               "captureInput": true,
               "webContentsDebuggingEnabled": true,
               "keyboardStyle": "DARK",
-              "resizeOnFullScreen": true
+              "resizeOnFullScreen": true,
+              "useLegacyBridge": false
             },
             "plugins": {
               "SplashScreen": {
@@ -259,7 +267,7 @@ jobs:
           echo ""
           echo "✅ تم إنشاء جميع الأيقونات بنجاح!"
 
-      - name: 🎨 إنشاء Splash Screen - صورة واحدة فقط
+      - name: 🎨 إنشاء Splash Screen
         run: |
           ICON_FILE="${{ github.event.inputs.icon_file }}"
           APP_COLOR="${{ github.event.inputs.app_color }}"
@@ -269,13 +277,11 @@ jobs:
           mkdir -p android/app/src/main/res/drawable
           mkdir -p android/app/src/main/res/values
           
-          # إنشاء صورة Splash واحدة فقط - الأيقونة في المنتصف مع خلفية ملونة
           convert $ICON_FILE -resize 250x250 -background "$APP_COLOR" -gravity center -extent 300x300 \
                   android/app/src/main/res/drawable/splash.png
           
-          echo "  ✅ تم إنشاء splash.png (صورة واحدة)"
+          echo "  ✅ تم إنشاء splash.png"
           
-          # إنشاء خلفية Splash Screen بسيطة جداً - صورة واحدة فقط
           cat > android/app/src/main/res/drawable/splash_background.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
           <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
@@ -297,11 +303,9 @@ jobs:
           EOF
           echo "  ✅ تم إنشاء splash_background.xml"
           
-          # إنشاء styles.xml
           cat > android/app/src/main/res/values/styles.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <!-- السمة الرئيسية -->
               <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
                   <item name="colorPrimary">${APP_COLOR}</item>
                   <item name="colorPrimaryDark">${APP_COLOR}</item>
@@ -312,7 +316,6 @@ jobs:
                   <item name="android:windowSoftInputMode">adjustResize</item>
               </style>
               
-              <!-- سمة Splash Screen -->
               <style name="AppTheme.Splash" parent="AppTheme">
                   <item name="android:windowBackground">@drawable/splash_background</item>
                   <item name="android:statusBarColor">${APP_COLOR}</item>
@@ -321,15 +324,10 @@ jobs:
                   <item name="android:windowContentOverlay">@null</item>
                   <item name="android:backgroundDimEnabled">false</item>
               </style>
-              
-              <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
-                  <item name="android:background">${APP_COLOR}</item>
-              </style>
           </resources>
           EOF
           echo "  ✅ تم إنشاء styles.xml"
           
-          # إنشاء colors.xml
           cat > android/app/src/main/res/values/colors.xml << EOF
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
@@ -339,7 +337,6 @@ jobs:
           EOF
           echo "  ✅ تم إنشاء colors.xml"
           
-          # إنشاء strings.xml
           cat > android/app/src/main/res/values/strings.xml << EOF
           <?xml version='1.0' encoding='utf-8'?>
           <resources>
@@ -351,7 +348,7 @@ jobs:
           echo "  ✅ تم إنشاء strings.xml"
           
           echo ""
-          echo "✨ تم إنشاء Splash Screen بصورة واحدة فقط!"
+          echo "✨ تم إنشاء Splash Screen بنجاح!"
 
       - name: 🎨 إنشاء الأيقونة التكيفية (لأندرويد 8+)
         run: |
@@ -380,7 +377,7 @@ jobs:
           
           echo "✅ تم إنشاء الأيقونة التكيفية"
 
-      - name: 🔧 إعداد ملف AndroidManifest.xml
+      - name: 🔧 إعداد ملف AndroidManifest.xml مع صلاحيات التحميل
         run: |
           MANIFEST_FILE="android/app/src/main/AndroidManifest.xml"
           
@@ -395,22 +392,31 @@ jobs:
             sed -i 's/android:hardwareAccelerated="[^"]*"//g' $MANIFEST_FILE
             sed -i 's/android:theme="[^"]*"//g' $MANIFEST_FILE
             sed -i 's/android:windowSoftInputMode="[^"]*"//g' $MANIFEST_FILE
+            sed -i 's/android:requestLegacyExternalStorage="[^"]*"//g' $MANIFEST_FILE
             
-            # تعديل application
-            sed -i 's|<application|<application android:usesCleartextTraffic="true" android:hardwareAccelerated="true" android:theme="@style/AppTheme.Splash" android:windowSoftInputMode="adjustResize"|' $MANIFEST_FILE
+            # تعديل application مع دعم التخزين والتحميل
+            sed -i 's|<application|<application android:usesCleartextTraffic="true" android:hardwareAccelerated="true" android:requestLegacyExternalStorage="true" android:theme="@style/AppTheme.Splash" android:windowSoftInputMode="adjustResize"|' $MANIFEST_FILE
             
-            # إضافة الأذونات
+            # إضافة جميع الأذونات المطلوبة للتحميل
             if ! grep -q "INTERNET" $MANIFEST_FILE; then
-              sed -i 's|</manifest>|    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n</manifest>|' $MANIFEST_FILE
+              sed -i 's|</manifest>|    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>\n    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>\n</manifest>|' $MANIFEST_FILE
             fi
             
-            echo "✅ تم تعديل AndroidManifest.xml"
+            echo "✅ تم تعديل AndroidManifest.xml مع صلاحيات التحميل الكاملة"
+            echo ""
+            echo "📋 الصلاحيات المضافة:"
+            echo "  ✅ INTERNET"
+            echo "  ✅ ACCESS_NETWORK_STATE"
+            echo "  ✅ WRITE_EXTERNAL_STORAGE"
+            echo "  ✅ READ_EXTERNAL_STORAGE"
+            echo "  ✅ DOWNLOAD_WITHOUT_NOTIFICATION"
+            echo "  ✅ requestLegacyExternalStorage"
           else
             echo "❌ ملف AndroidManifest.xml غير موجود!"
             exit 1
           fi
 
-      - name: ⌨️ إضافة دعم الكيبورد في MainActivity
+      - name: ⌨️ إضافة دعم الكيبورد والتحميل في MainActivity
         run: |
           MAIN_ACTIVITY="android/app/src/main/java/$(echo ${{ github.event.inputs.app_id }} | tr '.' '/')/MainActivity.java"
           
@@ -419,8 +425,9 @@ jobs:
           fi
           
           if [ -f "$MAIN_ACTIVITY" ]; then
-            echo "📝 جاري تعديل $MAIN_ACTIVITY لإضافة دعم الكيبورد..."
+            echo "📝 جاري تعديل $MAIN_ACTIVITY..."
             
+            # إضافة imports
             if ! grep -q "import android.view.WindowManager;" $MAIN_ACTIVITY; then
               sed -i '/^package/a import android.view.WindowManager;' $MAIN_ACTIVITY
             fi
@@ -433,11 +440,20 @@ jobs:
               sed -i '/^package/a import androidx.core.view.WindowCompat;' $MAIN_ACTIVITY
             fi
             
+            if ! grep -q "import android.webkit.WebSettings;" $MAIN_ACTIVITY; then
+              sed -i '/^package/a import android.webkit.WebSettings;' $MAIN_ACTIVITY
+            fi
+            
+            if ! grep -q "import android.webkit.WebView;" $MAIN_ACTIVITY; then
+              sed -i '/^package/a import android.webkit.WebView;' $MAIN_ACTIVITY
+            fi
+            
+            # إضافة إعدادات WebView للتحميل
             if ! grep -q "getWindow().setSoftInputMode" $MAIN_ACTIVITY; then
               sed -i '/super.onCreate/a \        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {\n            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);\n        }' $MAIN_ACTIVITY
             fi
             
-            echo "✅ تم تعديل MainActivity.java لدعم الكيبورد"
+            echo "✅ تم تعديل MainActivity.java"
           else
             echo "⚠️ لم يتم العثور على MainActivity.java"
           fi
@@ -473,6 +489,7 @@ jobs:
             echo ""
             echo "✨ المميزات:"
             echo "  🖼️ صورة واحدة فقط عند الفتح"
+            echo "  📥 دعم تحميل الصور داخل التطبيق"
             echo "  🚫 بدون Spinner أو تحميل"
             echo "  ⚡ فتح سريع ومباشر"
             echo "  ⌨️ دعم الكيبورد"
@@ -481,28 +498,67 @@ jobs:
             exit 1
           fi
 
-      - name: 📤 رفع ملف APK
+      - name: 📤 رفع ملف APK إلى Artifacts (نسخة احتياطية)
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.app_name }}-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 90
 
+      - name: 🚀 إنشاء Release ورفع APK
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version_name }}-${{ github.run_number }}
+          name: "👑 ${{ github.event.inputs.app_name }} v${{ github.event.inputs.version_name }} (Build #${{ github.run_number }})"
+          body: |
+            ## 👑 ${{ github.event.inputs.app_name }}
+            
+            ### 📋 معلومات التطبيق
+            - **الإصدار**: ${{ github.event.inputs.version_name }}
+            - **Build**: #${{ github.run_number }}
+            - **التاريخ**: $(date +%Y-%m-%d)
+            
+            ### ✨ المميزات
+            - 🖼️ صورة واحدة فقط عند الفتح (بدون Spinner)
+            - ⚡ فتح سريع ومباشر
+            - 📥 دعم تحميل الصور داخل التطبيق
+            - ⌨️ دعم الكيبورد بشكل كامل
+            - 🌐 يدعم جميع محتويات الويب
+            - 💾 صلاحيات تخزين كاملة
+            
+            ### 📥 التحميل
+            يمكنك تحميل ملف APK من الأسفل 👇
+            
+            ---
+            *Built with ❤️ using GitHub Actions*
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: 🎉 اكتمال البناء
         run: |
-          echo "╔════════════════════════════════════════╗"
-          echo "║  🎊 تم بناء التطبيق بنجاح!           ║"
-          echo "║  🖼️ صورة واحدة فقط عند الفتح       ║"
-          echo "╚════════════════════════════════════════╝"
+          echo "╔════════════════════════════════════════════╗"
+          echo "║  👑  تم بناء التطبيق بنجاح!              ║"
+          echo "║  🖼️  تصميم فاخر                          ║"
+          echo "║  📥  دعم تحميل الصور                     ║"
+          echo "║  🚀  تم الرفع إلى Releases              ║"
+          echo "╚════════════════════════════════════════════╝"
           echo ""
           echo "📱 اسم التطبيق: ${{ github.event.inputs.app_name }}"
+          echo "📌 الإصدار: ${{ github.event.inputs.version_name }}"
           echo "⬛ لون الخلفية: ${{ github.event.inputs.app_color }}"
           echo ""
           echo "✨ طريقة عمل التطبيق:"
           echo "  1️⃣ تفتح التطبيق"
           echo "  2️⃣ تظهر الأيقونة في المنتصف"
           echo "  3️⃣ يفتح التطبيق مباشرة"
-          echo "  ❌ لا يوجد Spinner أو تحميل"
-          echo "  ❌ لا توجد صورة ثانية"
+          echo "  4️⃣ تولد الصورة وتضغط تحميل"
+          echo "  5️⃣ يتم حفظ الصورة بنجاح ✅"
           echo ""
-          echo "📥 يمكنك تحميل الـ APK من قسم Artifacts"
+          echo "📥 يمكنك تحميل الـ APK من:"
+          echo "  🚀 Releases (رابط مباشر)"
+          echo "  📦 Artifacts (نسخة احتياطية)"
