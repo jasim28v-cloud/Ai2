@@ -33,11 +33,6 @@ on:
         required: false
         default: '2000'
         type: string
-      version_name:
-        description: '📌 إصدار التطبيق (مثال: 1.0.0)'
-        required: false
-        default: '1.0.0'
-        type: string
 
 permissions:
   contents: write
@@ -486,52 +481,21 @@ jobs:
             exit 1
           fi
 
-      - name: 📤 رفع ملف APK إلى Artifacts (نسخة احتياطية)
+      - name: 📤 رفع ملف APK
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.inputs.app_name }}-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 90
 
-      - name: 🚀 إنشاء Release ورفع APK
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ github.event.inputs.version_name }}-${{ github.run_number }}
-          name: "${{ github.event.inputs.app_name }} v${{ github.event.inputs.version_name }} (Build #${{ github.run_number }})"
-          body: |
-            ## 📱 ${{ github.event.inputs.app_name }}
-            
-            ### 📋 معلومات التطبيق
-            - **الإصدار**: ${{ github.event.inputs.version_name }}
-            - **Build**: #${{ github.run_number }}
-            - **التاريخ**: ${{ github.event.ref_name }}
-            
-            ### ✨ المميزات
-            - 🖼️ صورة واحدة فقط عند الفتح (بدون Spinner)
-            - ⚡ فتح سريع ومباشر
-            - ⌨️ دعم الكيبورد بشكل كامل
-            - 🌐 يدعم جميع محتويات الويب
-            
-            ### 📥 التحميل
-            يمكنك تحميل ملف APK من الأسفل 👇
-          files: android/app/build/outputs/apk/debug/app-debug.apk
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 🎉 اكتمال البناء
         run: |
           echo "╔════════════════════════════════════════╗"
           echo "║  🎊 تم بناء التطبيق بنجاح!           ║"
           echo "║  🖼️ صورة واحدة فقط عند الفتح       ║"
-          echo "║  🚀 تم الرفع إلى Releases           ║"
           echo "╚════════════════════════════════════════╝"
           echo ""
           echo "📱 اسم التطبيق: ${{ github.event.inputs.app_name }}"
-          echo "📌 الإصدار: ${{ github.event.inputs.version_name }}"
           echo "⬛ لون الخلفية: ${{ github.event.inputs.app_color }}"
           echo ""
           echo "✨ طريقة عمل التطبيق:"
@@ -541,6 +505,4 @@ jobs:
           echo "  ❌ لا يوجد Spinner أو تحميل"
           echo "  ❌ لا توجد صورة ثانية"
           echo ""
-          echo "📥 يمكنك تحميل الـ APK من:"
-          echo "  🚀 Releases (رابط مباشر)"
-          echo "  📦 Artifacts (نسخة احتياطية)"
+          echo "📥 يمكنك تحميل الـ APK من قسم Artifacts"
