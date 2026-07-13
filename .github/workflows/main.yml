@@ -1,0 +1,78 @@
+name: 💖 Auto Deploy - Face Swap AI
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      deploy_message:
+        description: 'وصف النشر'
+        required: false
+        default: '💖 Auto Deploy Face Swap'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 سحب المستودع
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🐍 إعداد Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: 🔧 تشغيل scraper.py لتوليد موقع Face Swap
+        run: |
+          echo "🔄 جاري توليد موقع Face Swap AI..."
+          python scraper.py
+          echo "✅ تم توليد الموقع في مجلد www/"
+      
+      - name: 📊 عرض محتويات www
+        run: |
+          echo "📁 محتويات مجلد www:"
+          ls -la www/
+          echo ""
+          echo "💾 حجم الملفات:"
+          du -sh www/
+      
+      - name: 📋 نسخ index.html للجذر للعرض المباشر
+        run: |
+          if [ -f "www/index.html" ]; then
+            cp www/index.html index.html
+            echo "✅ تم نسخ index.html للجذر"
+          fi
+      
+      - name: 🚀 رفع الملفات إلى GitHub
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "💖 Auto Deploy - Face Swap AI [skip ci]"
+          commit_author: "Bot 🤖 <actions@github.com>"
+          file_pattern: 'www/* index.html'
+      
+      - name: ✅ تأكيد النشر
+        run: |
+          echo "╔══════════════════════════════════════╗"
+          echo "║  💖 Face Swap AI Generated!        ║"
+          echo "║  📁 www/ جاهز للبناء               ║"
+          echo "╚══════════════════════════════════════╝"
+
+  notify:
+    needs: generate-and-deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 📊 ملخص
+        run: |
+          if [ "${{ needs.generate-and-deploy.result }}" == "success" ]; then
+            echo "🟢 النشر نجح! 💖"
+          else
+            echo "🔴 النشر فشل!"
+          fi
